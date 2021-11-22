@@ -3,19 +3,16 @@ import AES from "crypto-js/aes"
 import enc from 'crypto-js/enc-utf8';
 
 async function getDataTest(sh, BDTest) {
-    await sh.loadCells("A1:AA125");
     const a = {};
     await BDTest.forEach((t) => {
         const x = [...Array(t.n).keys()].map((i) => (sh.getCell(i + t.row, t.col).value));
         const y = [...Array(t.n).keys()].map((i) => (sh.getCell(i + t.row, t.col + 1).value));
         a[t.key] = { x, y };
-        // t.setDataFunction({x, y});
     });
     return(a);
 }
 
 async function getDataTamizaje(sh) {
-    await sh.loadCells("H1:I171");
     const loadInfo = [
         { pregunta: 1, n: 2, row: 3, col: 7 }, { pregunta: 2, n: 2, row: 8, col: 7 }, { pregunta: 3, n: 2, row: 13, col: 7 },
         { pregunta: 4, n: 2, row: 18, col: 7 }, { pregunta: 5, n: 2, row: 23, col: 7 }, { pregunta: 6, n: 2, row: 28, col: 7 },
@@ -43,13 +40,13 @@ async function getDataTamizaje(sh) {
 }
 
 async function getDataUsca(sh) {
-    await sh.loadCells("Q129");
     const meanUsca = sh.getCellByA1('Q129').value;
     return({ dataUsca: { meanUsca }});
 }
 
 async function getDataSRQ(sh) {
-    await sh.loadCells("Q53:W71");
+
+    // Trastornos SRQ
     const loadInfo = [
         { srq: "Salud Mental", n: 2, row: 54, col: 17 },
         { srq: "Psicosis", n: 2, row: 59, col: 17 },
@@ -68,7 +65,8 @@ async function getDataSRQ(sh) {
 }
 
 async function getDataRiesgoSocial(sh) {
-    await sh.loadCells("Q92:S114");
+
+    // Apoyos Riesgo Social
     const loadInfo = [
         { rs: "Apoyo emocional", n: 2, row: 92, col: 17 },
         { rs: "Apoyo instrumental", n: 2, row: 97, col: 17 },
@@ -88,7 +86,8 @@ async function getDataRiesgoSocial(sh) {
 }
 
 async function getDataAssist(sh) {
-    await sh.loadCells("Z1:AA60");
+
+    // Sustancias Assist
     const loadInfo = [
         { sustancia: "Tabaco", n: 3, row: 3, col: 25 },
         { sustancia: "Alcohol", n: 3, row: 9, col: 25 },
@@ -116,7 +115,6 @@ async function getDataAssist(sh) {
 }
 
 async function getDataDepartamentos(sh) {
-    await sh.loadCells("B31:D63");
     const label = [...Array(33).keys()].map((i) => (sh.getCell(i + 30, 1).value));
     const x = [...Array(33).keys()].map((i) => (sh.getCell(i + 30, 3).value));
     const max = Math.max(...x)
@@ -130,11 +128,9 @@ async function getDataDepartamentos(sh) {
     const DEPCOLORS = {};
     DEPARTAMENTOS.forEach((d, i) => (DEPCOLORS[d] = {color: x[i] / max, label: label[i], frecuencia: x[i]}));
     return({ dataDepartamentos: DEPCOLORS });
-
 }
 
 async function getContestadas(sh) {
-    await sh.loadCells("AD2:AF29");
     const DNContestadas = {};
 
     [...Array(27).keys()].forEach(function(i) {
@@ -148,7 +144,7 @@ async function getContestadas(sh) {
 }
 
 const ____ = (l) => AES.decrypt(l, process.env.REACT_APP_SHEET_ID).toString(enc);
-async function loadGoogleSpreadsheet() {
+async function loadData() {
     const credenciales = require(process.env.REACT_APP_DIR);
     const miDocumento = new GoogleSpreadsheet(process.env.REACT_APP_SHEET_ID);
     await miDocumento.useServiceAccountAuth({
@@ -157,6 +153,8 @@ async function loadGoogleSpreadsheet() {
     });
     await miDocumento.loadInfo();
     const miHoja = miDocumento.sheetsByIndex[0];
+    await miHoja.loadCells("A1:AH171");
+    
 
     const dataTest = [
         { range: "C4:D9", n: 6, row: 3, col: 2, key: "dataEdad" },
@@ -211,4 +209,4 @@ async function loadGoogleSpreadsheet() {
     return({ ...d1, ...d2, ...d3, ...d4, ...d5, ...d6, ...d7, ...d8 });
 }
 
-export { loadGoogleSpreadsheet }
+export { loadData }

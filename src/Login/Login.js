@@ -26,11 +26,12 @@ function Login(props) {
             navigate('/dashvigor/');
         } else {
             setContrasenaIncorrecta(true);
+            setContrasenaIngresada("");
         }
     }
 
     function ingresar(ev) {
-        setContrasenaIngresada(ev.target.value)
+        setContrasenaIngresada(ev.target.value);
     }
 
     return(
